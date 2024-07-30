@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "automator": "tsx src/automator/index.ts",
+    "automator": "source .env && tsx src/automator/index.ts",
     "react:dev": "vite",
     "react:build": "tsc -b && vite build",
     "react:preview": "vite preview",
