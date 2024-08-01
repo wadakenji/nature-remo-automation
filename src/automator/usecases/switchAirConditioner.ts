@@ -1,10 +1,15 @@
 import { turnOffAirConditioner, turnOnAirConditioner } from '../nature-remo';
-import { format } from 'date-fns';
+import { format, hoursToMilliseconds, minutesToMilliseconds } from 'date-fns';
 
-const TEMPERATURE = 29;
-const TIME_UNTIL_FIRST_TURN_OFF = 1000 * 60 * 60 * 1;
-const TIME_UNTIL_FIRST_TURN_ON = TIME_UNTIL_FIRST_TURN_OFF + 1000 * 60 * 30;
-const DURATION_OF_A_CYCLE = 1000 * 60 * 60 * 1;
+const TEMPERATURE = 32;
+
+const TURN_OFF_DURATION = minutesToMilliseconds(20);
+const TURN_ON_DURATION = minutesToMilliseconds(20);
+
+const TIME_UNTIL_FIRST_TURN_OFF = hoursToMilliseconds(1);
+const TIME_UNTIL_FIRST_TURN_ON = TIME_UNTIL_FIRST_TURN_OFF + TURN_OFF_DURATION;
+
+const DURATION_OF_A_CYCLE = TURN_OFF_DURATION + TURN_ON_DURATION;
 
 const turnOffAndLog = async () => {
   await turnOffAirConditioner();
