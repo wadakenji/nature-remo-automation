@@ -1,38 +1,52 @@
 import { turnOffAirConditioner, turnOnAirConditioner } from '../nature-remo';
 import { format, hoursToMilliseconds, minutesToMilliseconds } from 'date-fns';
 
-const TEMPERATURE = 32;
-
-const TURN_OFF_DURATION = minutesToMilliseconds(20);
-const TURN_ON_DURATION = minutesToMilliseconds(20);
-
-const TIME_UNTIL_FIRST_TURN_OFF = hoursToMilliseconds(1);
-const TIME_UNTIL_FIRST_TURN_ON = TIME_UNTIL_FIRST_TURN_OFF + TURN_OFF_DURATION;
-
-const DURATION_OF_A_CYCLE = TURN_OFF_DURATION + TURN_ON_DURATION;
-
-const turnOffAndLog = async () => {
-  await turnOffAirConditioner();
-  console.log('オフ: ', format(new Date(), 'hh時mm分'));
+type AirConditionerState = {
+  key: string;
+  action: () => Promise<void>;
+  duration: number;
 };
 
-const turnOnAndLog = async () => {
-  await turnOnAirConditioner({ temperature: String(TEMPERATURE) });
-  console.log('オン: ', format(new Date(), 'hh時mm分'));
-};
+const AIR_CONDITIONER_STATES: AirConditionerState[] = [
+  {
+    key: '32℃オン ',
+    action: async () => turnOnAirConditioner({ temperature: '32' }),
+    duration: minutesToMilliseconds(40),
+  },
+  {
+    key: '30℃オン ',
+    action: async () => turnOnAirConditioner({ temperature: '30' }),
+    duration: minutesToMilliseconds(15),
+  },
+  {
+    key: 'オフ ',
+    action: async () => turnOffAirConditioner(),
+    duration: minutesToMilliseconds(5),
+  },
+];
+
+const TIME_UNTIL_START = hoursToMilliseconds(1);
+const DURATION_OF_A_CYCLE = AIR_CONDITIONER_STATES.reduce(
+  (acc, { duration }) => acc + duration,
+  0,
+);
 
 export const switchAirConditioner = () => {
-  setTimeout(async () => {
-    await turnOffAndLog();
-    setInterval(async () => {
-      await turnOffAndLog();
-    }, DURATION_OF_A_CYCLE);
-  }, TIME_UNTIL_FIRST_TURN_OFF);
+  let setTimeoutDuration = TIME_UNTIL_START;
 
-  setTimeout(async () => {
-    await turnOnAndLog();
-    setInterval(async () => {
-      await turnOnAndLog();
-    }, DURATION_OF_A_CYCLE);
-  }, TIME_UNTIL_FIRST_TURN_ON);
+  AIR_CONDITIONER_STATES.forEach(({ key, action, duration }) => {
+    const actionAndLog = async () => {
+      await action().catch(console.error);
+      console.log(key, format(new Date(), 'hh時mm分'));
+    };
+
+    setTimeout(async () => {
+      await actionAndLog();
+      setInterval(async () => {
+        await actionAndLog();
+      }, DURATION_OF_A_CYCLE);
+    }, setTimeoutDuration);
+
+    setTimeoutDuration = setTimeoutDuration + duration;
+  });
 };
