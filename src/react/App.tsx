@@ -3,10 +3,10 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { format } from 'date-fns';
 
 //prettier-ignore
-const json: { datetime: string; temperature: number }[] = [];
-const data: TemperatureRecord[] = json.map(({ datetime, temperature }) => ({
-  temperature,
+const json: (Omit<TemperatureRecord, 'datetime'> & { datetime: string })[] = [];
+const data: TemperatureRecord[] = json.map(({ datetime, ...rest }) => ({
   datetime: new Date(datetime),
+  ...rest,
 }));
 
 function App() {
@@ -35,7 +35,20 @@ function App() {
           tickLine={false}
           unit={'℃'}
         />
-        <Line type="basis" stroke="#8884d8" dataKey="temperature" dot={false} />
+        <Line
+          type="basis"
+          stroke="#f37190"
+          strokeWidth={2}
+          dataKey="temperature"
+          dot={false}
+        />
+        <Line
+          type="stepAfter"
+          strokeWidth={2}
+          stroke="#46a3e0"
+          dataKey="airConditionerTemperatureSetting"
+          dot={false}
+        />
       </LineChart>
     </main>
   );
