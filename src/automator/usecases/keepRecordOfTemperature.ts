@@ -1,4 +1,10 @@
-import { addDays, format, getHours, startOfDay } from 'date-fns';
+import {
+  addDays,
+  format,
+  getHours,
+  minutesToMilliseconds,
+  startOfDay,
+} from 'date-fns';
 import { getTemperature, getMyDevice } from '../nature-remo';
 import { readJsonFile, writeJsonFile } from '../../utils/json.ts';
 import { TemperatureRecord } from '../../types';
@@ -13,22 +19,19 @@ export const keepRecordOfTemperature = () => {
   const filename = format(targetDate, 'yyyyMMdd');
   writeJsonFile(filename, []);
 
-  setInterval(
-    async () => {
-      const myDevice = await getMyDevice();
-      const temperature = await getTemperature(myDevice);
-      const airConditionerTemperatureSetting =
-        await getAirConditionerTemperatureSetting();
-      const temperatureRecord: TemperatureRecord = {
-        datetime: new Date(),
-        temperature,
-        airConditionerTemperatureSetting,
-      };
+  setInterval(async () => {
+    const myDevice = await getMyDevice();
+    const temperature = await getTemperature(myDevice);
+    const airConditionerTemperatureSetting =
+      await getAirConditionerTemperatureSetting();
+    const temperatureRecord: TemperatureRecord = {
+      datetime: new Date(),
+      temperature,
+      airConditionerTemperatureSetting,
+    };
 
-      const temperatureRecords = readJsonFile(filename) as TemperatureRecord[];
-      temperatureRecords.push(temperatureRecord);
-      writeJsonFile(filename, temperatureRecords);
-    },
-    1000 * 60 * 5,
-  );
+    const temperatureRecords = readJsonFile(filename) as TemperatureRecord[];
+    temperatureRecords.push(temperatureRecord);
+    writeJsonFile(filename, temperatureRecords);
+  }, minutesToMilliseconds(4));
 };
