@@ -14,7 +14,7 @@ export const getAirConditionerTemperatureSetting = async (): Promise<
 
   const { button, temp } = airConditioner.settings;
 
-  if (button === 'power-off') return null;
+  if (button === 'power-off' || !temp) return null;
 
   return Number(temp);
 };
